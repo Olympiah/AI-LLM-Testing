@@ -1,17 +1,19 @@
-import {OpenAI} from "langchain/llms/openai";
+import {ChatOpenAI, OpenAIEmbeddings} from "@langchain/openai";
 import {pinecone} from "@/utils/pinecone-client";
-import {PineconeStore} from "langchain/vectorstores/pinecone";
-import {OpenAIEmbeddings} from "langchain/embeddings/openai";
-import {ConversationalRetrievalQAChain} from "langchain/chains";
+import {PineconeStore} from "@langchain/pinecone";
+import {ConversationalRetrievalQAChain} from "@langchain/classic/chains";
 
 async function initChain() {
-    const model = new OpenAI({});
+    const model = new ChatOpenAI({
+        model: "gpt-4o-mini",
+        temperature: 0,
+    });
 
     const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX ?? '');
 
     /* create vectorstore*/
     const vectorStore = await PineconeStore.fromExistingIndex(
-        new OpenAIEmbeddings({}),
+        new OpenAIEmbeddings({model: "text-embedding-3-small"}),
         {
             pineconeIndex: pineconeIndex,
             textKey: 'text',

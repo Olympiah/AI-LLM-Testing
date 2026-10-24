@@ -1,44 +1,18 @@
-import { PineconeClient } from '@pinecone-database/pinecone';
+import { Pinecone } from '@pinecone-database/pinecone';
 
-if (!process.env.PINECONE_ENVIRONMENT || !process.env.PINECONE_API_KEY) {
-    throw new Error('Pinecone environment or api key vars missing');
+if (!process.env.PINECONE_API_KEY) {
+    throw new Error('Pinecone api key var missing');
 }
 
-async function initPinecone() {
+function initPinecone() {
     try {
-        const pinecone = new PineconeClient();
-
-        await pinecone.init({
-            environment: process.env.PINECONE_ENVIRONMENT ?? '',
+        return new Pinecone({
             apiKey: process.env.PINECONE_API_KEY ?? '',
         });
-
-
-        return pinecone;
     } catch (error) {
         console.log('error', error);
         throw new Error('Failed to initialize Pinecone Client');
     }
 }
 
-export const pinecone = await initPinecone();
-
-
-// async function initPrisma() {
-//     try {
-//         const prisma = new PrismaClient();
-
-//         await pinecone.init({
-//             environment: process.env.PINECONE_ENVIRONMENT ?? '',
-//             apiKey: process.env.PINECONE_API_KEY ?? '',
-//         });
-
-
-//         return pinecone;
-//     } catch (error) {
-//         console.log('error', error);
-//         throw new Error('Failed to initialize Pinecone Client');
-//     }
-// }
-
-// export const pinecone = await initPinecone();
+export const pinecone = initPinecone();
