@@ -1,2 +1,5 @@
 data/
 .env
+node_modules/
+evals/results*.json
+evals/*.log

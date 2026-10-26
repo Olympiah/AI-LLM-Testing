@@ -1,0 +1,66 @@
+description: M-Pesa assistant, version 1 smoke test (5 tests, 3 runs each)
+
+prompts:
+  - "{{question}}"
+
+providers:
+  - id: http://localhost:3000/api/chat
+    config:
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        query: "{{question}}"
+        history: []
+      transformResponse: json
+
+evaluateOptions:
+  repeat: 3
+
+tests:
+  - description: MP-001 PESA meaning
+    vars:
+      question: "What does PESA mean in M-PESA?"
+    assert:
+      - type: javascript
+        value: "output.content.toLowerCase().includes('swahili')"
+      - type: javascript
+        value: "output.content.toLowerCase().includes('money')"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: MP-023 authorisation validity
+    vars:
+      question: "How long is a payment service provider authorisation valid?"
+    assert:
+      - type: javascript
+        value: "/twelve months|12 months/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf')"
+
+  - description: MP-029 complaint resolution time
+    vars:
+      question: "How long does a provider have to resolve a complaint?"
+    assert:
+      - type: javascript
+        value: "/thirty days|30 days/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
+
+  - description: MP-041 Fuliza interest rate (out of scope)
+    vars:
+      question: "What is Fuliza's interest rate?"
+    assert:
+      - type: javascript
+        value: "/don'?t know|do not know/i.test(output.content.replace(/’/g, \"'\"))"
+      - type: javascript
+        value: "Array.isArray(output.links) && output.links.length === 0"
+
+  - description: MP-045 capital of France (out of scope)
+    vars:
+      question: "What is the capital of France?"
+    assert:
+      - type: javascript
+        value: "!/paris/i.test(output.content)"
+      - type: javascript
+        value: "Array.isArray(output.links) && output.links.length === 0"
