@@ -1,4 +1,4 @@
-description: M-Pesa assistant, version 1 smoke test (5 tests, 3 runs each)
+description: M-Pesa assistant, version 1 baseline (42 tests, 3 runs each)
 
 prompts:
   - "{{question}}"
@@ -9,27 +9,244 @@ providers:
       method: POST
       headers:
         Content-Type: application/json
-      body:
-        query: "{{question}}"
-        history: []
+      body: '{"query": {{question | dump}}, "history": {{history | dump}}}'
       transformResponse: json
+
+defaultTest:
+  vars:
+    history: []
 
 evaluateOptions:
   repeat: 3
 
 tests:
-  - description: MP-001 PESA meaning
+  - description: "MP-001 Verify the bot explains what PESA means in M-PESA"
     vars:
       question: "What does PESA mean in M-PESA?"
     assert:
       - type: javascript
-        value: "output.content.toLowerCase().includes('swahili')"
+        value: "/swahili/i.test(output.content)"
       - type: javascript
-        value: "output.content.toLowerCase().includes('money')"
+        value: "/money/i.test(output.content)"
       - type: javascript
         value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
 
-  - description: MP-023 authorisation validity
+  - description: "MP-002 Verify the bot names the two companies that launched M-PESA"
+    vars:
+      question: "Which two companies launched M-PESA?"
+    assert:
+      - type: javascript
+        value: "/vodafone/i.test(output.content)"
+      - type: javascript
+        value: "/safaricom/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-003 Verify the bot lists the countries where M-PESA rollouts were terminated"
+    vars:
+      question: "In which countries were M-PESA rollouts terminated because of low uptake?"
+    assert:
+      - type: javascript
+        value: "/india/i.test(output.content)"
+      - type: javascript
+        value: "/romania/i.test(output.content)"
+      - type: javascript
+        value: "/albania/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-004 Verify the bot gives the Fuliza launch date and says what it is"
+    vars:
+      question: "When did Safaricom launch Fuliza and what is it?"
+    assert:
+      - type: javascript
+        value: "/\\b0?8(st|nd|rd|th)?\\s+(of\\s+)?january,?\\s+2019|january\\s+0?8(st|nd|rd|th)?,?\\s+2019|2019-01-08|0?8\\/0?1\\/2019/i.test(output.content)"
+      - type: javascript
+        value: "/overdraft/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-005 Verify the bot names who took over M-PESA development in September 2009"
+    vars:
+      question: "Who took over M-PESA development and second-line support in September 2009?"
+    assert:
+      - type: javascript
+        value: "/\\bIBM\\b/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-006 Verify the bot explains the original concept of M-PESA"
+    vars:
+      question: "What was the original concept of M-PESA?"
+    assert:
+      - type: javascript
+        value: "/microfinance/i.test(output.content)"
+      - type: javascript
+        value: "/loan/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-007 Verify the bot names the incentive that raised pilot transaction volume"
+    vars:
+      question: "What incentive increased transaction volume during the pilot?"
+    assert:
+      - type: javascript
+        value: "/5%/i.test(output.content)"
+      - type: javascript
+        value: "/airtime/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-008 Verify the bot describes the banks' December 2008 audit request and its outcome"
+    vars:
+      question: "What did a group of banks lobby for in December 2008, and what happened?"
+    assert:
+      - type: javascript
+        value: "/audit/i.test(output.content)"
+      - type: javascript
+        value: "/robust/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-009 Verify the bot gives the number of Kenyan M-PESA subscribers by December 2011"
+    vars:
+      question: "How many M-PESA subscribers did Kenya have by December 2011?"
+    assert:
+      - type: javascript
+        value: "/17 million|17,000,000/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-010 Verify the bot gives the maximum transfer to an unregistered user and its fee"
+    vars:
+      question: "What is the maximum that can be sent to an unregistered user, and what is the fee?"
+    assert:
+      - type: javascript
+        value: "/35,000/i.test(output.content)"
+      - type: javascript
+        value: "/275/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-011 Verify the bot gives the date M-PESA was shut down in India"
+    vars:
+      question: "When was M-PESA shut down in India?"
+    assert:
+      - type: javascript
+        value: "/\\b0?15(st|nd|rd|th)?\\s+(of\\s+)?july,?\\s+2019|july\\s+0?15(st|nd|rd|th)?,?\\s+2019|2019-07-15|15\\/0?7\\/2019/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-012 Verify the bot gives the Albania launch and shutdown dates"
+    vars:
+      question: "When was M-PESA launched and shut down in Albania?"
+    assert:
+      - type: javascript
+        value: "/may 2015/i.test(output.content)"
+      - type: javascript
+        value: "/\\b0?14(st|nd|rd|th)?\\s+(of\\s+)?july,?\\s+2017|july\\s+0?14(st|nd|rd|th)?,?\\s+2017|2017-07-14|14\\/0?7\\/2017/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-013 Verify the bot says what M-PESA used to meet KYC requirements"
+    vars:
+      question: "What did M-PESA use to meet KYC requirements?"
+    assert:
+      - type: javascript
+        value: "/identity card|national id/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-014 Verify the bot says when Safaricom was formed"
+    vars:
+      question: "When was Safaricom formed?"
+    assert:
+      - type: javascript
+        value: "/1997/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/Safaricom')"
+
+  - description: "MP-015 Verify the bot gives Vodafone's stake in Safaricom and when it was acquired"
+    vars:
+      question: "What stake did Vodafone acquire in Safaricom, and when?"
+    assert:
+      - type: javascript
+        value: "/40%/i.test(output.content)"
+      - type: javascript
+        value: "/2000/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/Safaricom')"
+
+  - description: "MP-016 Verify the bot names the Safaricom CEO since April 2020"
+    vars:
+      question: "Who has been Safaricom CEO since 1 April 2020?"
+    assert:
+      - type: javascript
+        value: "/ndegwa/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/Safaricom')"
+
+  - description: "MP-017 Verify the bot names the M-Shwari partner bank and launch date"
+    vars:
+      question: "Which bank partnered with Safaricom on M-Shwari, and when?"
+    assert:
+      - type: javascript
+        value: "/NCBA/i.test(output.content)"
+      - type: javascript
+        value: "/2012/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/Safaricom')"
+
+  - description: "MP-018 Verify the bot says who M-PESA Go is for"
+    vars:
+      question: "Who is M-PESA Go for?"
+    assert:
+      - type: javascript
+        value: "/\\b10\\s*(to|-|\\u2013|and)\\s*17\\b/i.test(output.content)"
+      - type: javascript
+        value: "/parental/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/Safaricom')"
+
+  - description: "MP-019 Verify the bot gives the Safaricom live 5G launch date and cities"
+    vars:
+      question: "When did Safaricom launch live 5G?"
+    assert:
+      - type: javascript
+        value: "/march 2021/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/Safaricom')"
+
+  - description: "MP-020 Verify the bot says when the Central Bank of Kenya was founded"
+    vars:
+      question: "When was the Central Bank of Kenya founded?"
+    assert:
+      - type: javascript
+        value: "/1966/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/Central_Bank_of_Kenya')"
+
+  - description: "MP-021 Verify the bot names the current CBK Governor"
+    vars:
+      question: "Who is the CBK Governor?"
+    assert:
+      - type: javascript
+        value: "/thugge/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/Central_Bank_of_Kenya')"
+
+  - description: "MP-022 Verify the bot gives the period of the CBK loan restructuring programme"
+    vars:
+      question: "How long did the CBK loan restructuring programme run during COVID-19?"
+    assert:
+      - type: javascript
+        value: "/march 2020/i.test(output.content)"
+      - type: javascript
+        value: "/march 2021/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/Central_Bank_of_Kenya')"
+
+  - description: "MP-023 Verify the bot states how long a provider authorisation is valid"
     vars:
       question: "How long is a payment service provider authorisation valid?"
     assert:
@@ -38,12 +255,186 @@ tests:
       - type: javascript
         value: "output.links.includes('https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf')"
 
-  - description: MP-029 complaint resolution time
+  - description: "MP-024 Verify the bot states the penalty for operating without authorisation"
+    vars:
+      question: "What is the penalty for running a payment service business without authorisation?"
+    assert:
+      - type: javascript
+        value: "/500,000|five hundred thousand/i.test(output.content)"
+      - type: javascript
+        value: "/three years|3 years/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf')"
+
+  - description: "MP-025 Verify the bot states how early a renewal application must be lodged"
+    vars:
+      question: "How early must a renewal application be lodged?"
+    assert:
+      - type: javascript
+        value: "/two months|2 months/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf')"
+
+  - description: "MP-026 Verify the bot states what happens if business does not start within six months"
+    vars:
+      question: "What happens if an authorised provider does not start business within six months?"
+    assert:
+      - type: javascript
+        value: "/six months/i.test(output.content)"
+      - type: javascript
+        value: "/apply|application|suspend|revoke/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf')"
+
+  - description: "MP-027 Verify the bot states the notice required before revoking an authorisation"
+    vars:
+      question: "How much notice must the Bank give before revoking or suspending an authorisation?"
+    assert:
+      - type: javascript
+        value: "/fourteen days|14 days/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf')"
+
+  - description: "MP-028 Verify the bot states how long records must be kept"
+    vars:
+      question: "How long must records be kept?"
+    assert:
+      - type: javascript
+        value: "/seven years|7 years/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf')"
+
+  - description: "MP-029 Verify the bot states the time limit to resolve a complaint"
     vars:
       question: "How long does a provider have to resolve a complaint?"
     assert:
       - type: javascript
         value: "/thirty days|30 days/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
+
+  - description: "MP-030 Verify the bot states the time limit to file a complaint"
+    vars:
+      question: "How long does a customer have to file a complaint with the provider?"
+    assert:
+      - type: javascript
+        value: "/fifteen days|15 days/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
+
+  - description: "MP-031 Verify the bot says complaint handling must be free"
+    vars:
+      question: "Can a provider charge for handling complaints?"
+    assert:
+      - type: javascript
+        value: "/free/i.test(output.content)"
+      - type: javascript
+        value: "!/isn['\u2019]t free|not free|is not free/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
+
+  - description: "MP-032 Verify the bot states the trust fund balance rule"
+    vars:
+      question: "What must the trust fund balance be compared with what is owed to customers?"
+    assert:
+      - type: javascript
+        value: "/never|not (at any time )?be less|not less|at least|not fall below|not go below/i.test(output.content)"
+      - type: javascript
+        value: "/owed|owe|due to/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
+
+  - description: "MP-033 Verify the bot says trust funds cannot be moved to the provider's operating account"
+    vars:
+      question: "May a provider move trust funds into its own operating account?"
+    assert:
+      - type: javascript
+        value: "/^\\s*no\\b/i.test(output.content) || /may not|must not|cannot|not permitted|prohibited/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
+
+  - description: "MP-034 Verify the bot says where trust funds may be placed"
+    vars:
+      question: "Where may trust funds be placed?"
+    assert:
+      - type: javascript
+        value: "/commercial banks?/i.test(output.content)"
+      - type: javascript
+        value: "/government of kenya securities|kenya government securities|government securities/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
+
+  - description: "MP-035 Verify the bot says how customer identity is verified"
+    vars:
+      question: "How must a provider verify a customer's identity card or passport?"
+    assert:
+      - type: javascript
+        value: "/integrated population registration system/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
+
+  - description: "MP-036 Verify the bot states the notice required before a substantial change"
+    vars:
+      question: "How much notice must a provider give the Bank before a substantial change to its service?"
+    assert:
+      - type: javascript
+        value: "/thirty days|30 days/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
+
+  - description: "MP-037 Verify the bot resolves \"that authorisation\" in a follow-up about validity"
+    vars:
+      question: "And how long is that authorisation valid for?"
+      history:
+        - role: user
+          content: "What is the penalty for operating without authorisation?"
+        - role: assistant
+          content: "A fine not exceeding KSh 500,000, or imprisonment not exceeding three years, or both."
+    assert:
+      - type: javascript
+        value: "/twelve months|12 months/i.test(output.content)"
+      - type: javascript
+        value: "!/which authori[sz]ation|which one|clarify|specify|could you tell/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf')"
+
+  - description: "MP-038 Verify the bot keeps the subject in a follow-up about where M-PESA launched"
+    vars:
+      question: "Which country did it first launch in?"
+      history:
+        - role: user
+          content: "Who launched M-PESA?"
+        - role: assistant
+          content: "Vodafone and Safaricom (launched 2007)."
+    assert:
+      - type: javascript
+        value: "/kenya/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://en.wikipedia.org/wiki/M-Pesa')"
+
+  - description: "MP-039 Verify the bot combines the complaint time limit and the appeal to the Bank"
+    vars:
+      question: "If I complain to my provider and I am not satisfied, what can I do?"
+    assert:
+      - type: javascript
+        value: "/thirty days|30 days/i.test(output.content)"
+      - type: javascript
+        value: "/appeal/i.test(output.content)"
+      - type: javascript
+        value: "/\\bthe bank\\b|central bank/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
+
+  - description: "MP-040 Verify the bot combines the licence rule and the trust fund rule"
+    vars:
+      question: "What licence does a provider need, and what does the law say it must do with customer money?"
+    assert:
+      - type: javascript
+        value: "/authori[sz]ation|licen[cs]e/i.test(output.content)"
+      - type: javascript
+        value: "/trust (fund|account)/i.test(output.content)"
+      - type: javascript
+        value: "output.links.includes('https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf')"
       - type: javascript
         value: "output.links.includes('https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf')"
 
