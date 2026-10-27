@@ -3,3 +3,5 @@ data/
 node_modules/
 evals/results*.json
 evals/*.log
+evals/failures*.txt
+evals/contexts*.txt
