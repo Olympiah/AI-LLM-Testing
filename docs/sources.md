@@ -1,6 +1,6 @@
 # Sources
 
-This is the knowledge base the chatbot answers from. It holds five documents, which I fetched on 5 November 2026 and loaded into a Pinecone index named `mpesa-assistant`. The bot is meant to answer only from these documents. Every test in this project depends on what is in them, so this page records exactly what they are.
+This is the knowledge base the chatbot answers from. It holds five documents, which I fetched and loaded into a Pinecone index named `mpesa-assistant`. The bot is meant to answer only from these documents. Every test in this project depends on what is in them, so this page records exactly what they are.
 
 ## Summary
 
@@ -31,7 +31,7 @@ Total: 245 chunks. Each chunk is up to 1,000 characters, with 150 characters of 
 
 - **The Act is the 2011 text as originally enacted.** It is the copy the Central Bank of Kenya hosts, and it is not the current consolidated law. Amendments made since 2011 are not in it, so some rules may have changed. Where the bot repeats a rule from the Act, I treat it as correct if it matches this text, and I do not claim it is the law today.
 - **The Regulations are the 2014 Gazette text** (Kenya Subsidiary Legislation, 2014).
-- **The Wikipedia pages are snapshots** from 5 November 2026. They can change after that date, and parts of them are already out of date. For example, the M-Pesa article says Kenya does not have a data protection law, while the Central Bank article mentions a Data Protection Act. The tests follow the text in the knowledge base, not the live page.
+- **The Wikipedia pages are snapshots** taken when I fetched them. They can change after that, and parts of them are already out of date. For example, the M-Pesa article says Kenya does not have a data protection law, while the Central Bank article mentions a Data Protection Act. The tests follow the text in the knowledge base, not the live page.
 
 ## Sources I did not use, and why
 

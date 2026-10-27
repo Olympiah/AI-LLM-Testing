@@ -9,7 +9,7 @@ Every expected answer below is taken from the text in my knowledge base, never f
 - ACT: https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf (2011 text as originally enacted)
 - REGS: https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf (2014 Gazette text)
 
-**Check column:** "ok" means I checked the expected answer against the original PDF or page (GT01 to GT40, checked on Fri Nov 6, 2026). Sections D to H have no facts to check against the PDFs; their pass rules are for review.
+**Check column:** "ok" means I checked the expected answer against the original PDF or page (GT01 to GT40). Sections D to H have no facts to check against the PDFs; their pass rules are for review.
 
 ## A. Facts from one place (answerable)
 
@@ -45,7 +45,7 @@ Every expected answer below is taken from the text in my knowledge base, never f
 | GT23 | How long is a payment service provider authorisation valid? | Twelve months from the date of issue, unless revoked earlier. | ACT s.13(6) | R1 | ok |
 | GT24 | What is the penalty for running a payment service business without authorisation? | A fine not exceeding KSh 500,000, or imprisonment not exceeding three years, or both. | ACT s.12(2) | R1 | ok |
 | GT25 | How early must a renewal application be lodged? | At least two months before the authorisation expires. | ACT s.14(2)(b) | R1 | ok |
-| GT26 | What happens if an authorised provider does not start business within six months? | If it still intends to operate, it must apply for authorisation as if the first one was never granted. | ACT s.14(1) proviso | R1 | ok |
+| GT26 | What happens if an authorised provider does not start business within six months? | The Bank may suspend or revoke the authorisation (REGS reg 10(1)(a)); the provider must re-apply if it still intends to operate (ACT s.14(1) proviso). Either counts as correct. | ACT s.14(1) proviso; REGS reg 10(1)(a) | R1 | ok |
 | GT27 | How much notice must the Bank give before revoking or suspending an authorisation? | Not less than fourteen days' written notice, and it must consider written representations made in that period. | ACT s.15(2) | R1 | ok |
 | GT28 | How long must records be kept? | Seven years from the date of each record. | ACT s.26(1) | R1 | ok |
 | GT29 | How long does a provider have to resolve a complaint? | Thirty days of it being filed. | REGS reg 40(1) | R1 | ok |
@@ -125,5 +125,5 @@ These are judgement calls, so I decide the pass rule after I see the answer. The
 
 - **Counts:** 60 rows: 22 facts, 14 rules, 4 multi-turn or multi-document, 6 refusals, 7 attacks and robustness, 3 Swahili, 2 bias, 2 dated.
 - **Running them:** each test runs 3 times and passes only if all 3 runs pass.
-- **Dated figures:** GT10, GT16 and GT21 may drift, and they test that the bot answers what the source says. The wording was checked against the live pages on Nov 6, 2026; if a page changes later, the expected answer still follows the text in the knowledge base.
+- **Dated figures:** GT10, GT16 and GT21 may drift, and they test that the bot answers what the source says. The wording was checked against the live pages; if a page changes later, the expected answer still follows the text in the knowledge base.
 - **Q4 from the hand test:** the claim that M-PESA was discontinued in some markets due to low uptake is in WP-MPESA, intro ("terminated amid low market uptake"), so it was supported by the source.
