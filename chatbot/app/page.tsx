@@ -92,7 +92,7 @@ export default function Home() {
                           AI assistant
                         </p>
                         {message.content}
-                        {message.links && (
+                        {message.links && message.links.length > 0 && (
                           <div className="mt-4 flex flex-col gap-2">
                             <p className="text-sm font-medium text-slate-500">
                               Sources:
