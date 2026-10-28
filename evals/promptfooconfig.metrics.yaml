@@ -1,0 +1,794 @@
+description: M-Pesa assistant, version 1, trial of the retrieval and answer metrics (MP-001 to MP-040)
+
+prompts:
+  - "{{question}}"
+
+providers:
+  - id: http://localhost:3000/api/chat
+    config:
+      method: POST
+      headers:
+        Content-Type: application/json
+      body: '{"query": {{question | dump}}, "history": {{history | dump}}}'
+      transformResponse: json
+
+defaultTest:
+  vars:
+    history: []
+    query: "{{ question }}"
+  options:
+    provider:
+      id: openai:chat:gpt-4o
+      config:
+        temperature: 0
+
+tests:
+  - description: "MP-001 Verify the bot explains what PESA means in M-PESA"
+    vars:
+      question: "What does PESA mean in M-PESA?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "PESA is Swahili for money (M for mobile)."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "PESA is Swahili for money (M for mobile)."
+
+  - description: "MP-002 Verify the bot names the two companies that launched M-PESA"
+    vars:
+      question: "Which two companies launched M-PESA?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Vodafone and Safaricom (launched 2007)."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Vodafone and Safaricom (launched 2007)."
+
+  - description: "MP-003 Verify the bot lists the countries where M-PESA rollouts were terminated"
+    vars:
+      question: "In which countries were M-PESA rollouts terminated because of low uptake?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "India, Romania and Albania."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "India, Romania and Albania."
+
+  - description: "MP-004 Verify the bot gives the Fuliza launch date and says what it is"
+    vars:
+      question: "When did Safaricom launch Fuliza and what is it?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "8 January 2019; an M-PESA overdraft facility."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "8 January 2019; an M-PESA overdraft facility."
+
+  - description: "MP-005 Verify the bot names who took over M-PESA development in September 2009"
+    vars:
+      question: "Who took over M-PESA development and second-line support in September 2009?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "IBM (and from 26 February 2017 responsibilities moved to Huawei)."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "IBM (and from 26 February 2017 responsibilities moved to Huawei)."
+
+  - description: "MP-006 Verify the bot explains the original concept of M-PESA"
+    vars:
+      question: "What was the original concept of M-PESA?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Let microfinance borrowers receive and repay loans through Safaricom airtime resellers."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Let microfinance borrowers receive and repay loans through Safaricom airtime resellers."
+
+  - description: "MP-007 Verify the bot names the incentive that raised pilot transaction volume"
+    vars:
+      question: "What incentive increased transaction volume during the pilot?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "A 5% discount on airtime bought through M-PESA."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "A 5% discount on airtime bought through M-PESA."
+
+  - description: "MP-008 Verify the bot describes the banks' December 2008 audit request and its outcome"
+    vars:
+      question: "What did a group of banks lobby for in December 2008, and what happened?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "They lobbied the finance minister to audit M-PESA; the audit found the service robust."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "They lobbied the finance minister to audit M-PESA; the audit found the service robust."
+
+  - description: "MP-009 Verify the bot gives the number of Kenyan M-PESA subscribers by December 2011"
+    vars:
+      question: "How many M-PESA subscribers did Kenya have by December 2011?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "17 million."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "17 million."
+
+  - description: "MP-010 Verify the bot gives the maximum transfer to an unregistered user and its fee"
+    vars:
+      question: "What is the maximum that can be sent to an unregistered user, and what is the fee?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "KSh35,000, with a fee of KSh275."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "KSh35,000, with a fee of KSh275."
+
+  - description: "MP-011 Verify the bot gives the date M-PESA was shut down in India"
+    vars:
+      question: "When was M-PESA shut down in India?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "From 15 July 2019; Vodafone surrendered its PPI licence on 1 October 2019."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "From 15 July 2019; Vodafone surrendered its PPI licence on 1 October 2019."
+
+  - description: "MP-012 Verify the bot gives the Albania launch and shutdown dates"
+    vars:
+      question: "When was M-PESA launched and shut down in Albania?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Launched May 2015; shut down 14 July 2017."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Launched May 2015; shut down 14 July 2017."
+
+  - description: "MP-013 Verify the bot says what M-PESA used to meet KYC requirements"
+    vars:
+      question: "What did M-PESA use to meet KYC requirements?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Kenyan national identity cards."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Kenyan national identity cards."
+
+  - description: "MP-014 Verify the bot says when Safaricom was formed"
+    vars:
+      question: "When was Safaricom formed?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "1997, as a fully owned subsidiary of Telkom Kenya."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "1997, as a fully owned subsidiary of Telkom Kenya."
+
+  - description: "MP-015 Verify the bot gives Vodafone's stake in Safaricom and when it was acquired"
+    vars:
+      question: "What stake did Vodafone acquire in Safaricom, and when?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "40%, in May 2000."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "40%, in May 2000."
+
+  - description: "MP-016 Verify the bot names the Safaricom CEO since April 2020"
+    vars:
+      question: "Who has been Safaricom CEO since 1 April 2020?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Peter Ndegwa."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Peter Ndegwa."
+
+  - description: "MP-017 Verify the bot names the M-Shwari partner bank and launch date"
+    vars:
+      question: "Which bank partnered with Safaricom on M-Shwari, and when?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "NCBA Bank, in November 2012."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "NCBA Bank, in November 2012."
+
+  - description: "MP-018 Verify the bot says who M-PESA Go is for"
+    vars:
+      question: "Who is M-PESA Go for?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "10 to 17-year-olds, with parental controls (launched November 2022)."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "10 to 17-year-olds, with parental controls (launched November 2022)."
+
+  - description: "MP-019 Verify the bot gives the Safaricom live 5G launch date and cities"
+    vars:
+      question: "When did Safaricom launch live 5G?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "March 2021, initially in Nairobi, Kisumu, Kakamega and Kisii."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "March 2021, initially in Nairobi, Kisumu, Kakamega and Kisii."
+
+  - description: "MP-020 Verify the bot says when the Central Bank of Kenya was founded"
+    vars:
+      question: "When was the Central Bank of Kenya founded?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "1966, after the East African Currency Board was dissolved."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "1966, after the East African Currency Board was dissolved."
+
+  - description: "MP-021 Verify the bot names the current CBK Governor"
+    vars:
+      question: "Who is the CBK Governor?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Dr. Kamau Thugge (since June 2023)."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Dr. Kamau Thugge (since June 2023)."
+
+  - description: "MP-022 Verify the bot gives the period of the CBK loan restructuring programme"
+    vars:
+      question: "How long did the CBK loan restructuring programme run during COVID-19?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "March 2020 to March 2021."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "March 2020 to March 2021."
+
+  - description: "MP-023 Verify the bot states how long a provider authorisation is valid"
+    vars:
+      question: "How long is a payment service provider authorisation valid?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Twelve months from the date of issue, unless revoked earlier."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Twelve months from the date of issue, unless revoked earlier."
+
+  - description: "MP-024 Verify the bot states the penalty for operating without authorisation"
+    vars:
+      question: "What is the penalty for running a payment service business without authorisation?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "A fine not exceeding KSh 500,000, or imprisonment not exceeding three years, or both."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "A fine not exceeding KSh 500,000, or imprisonment not exceeding three years, or both."
+
+  - description: "MP-025 Verify the bot states how early a renewal application must be lodged"
+    vars:
+      question: "How early must a renewal application be lodged?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "At least two months before the authorisation expires."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "At least two months before the authorisation expires."
+
+  - description: "MP-026 Verify the bot states what happens if business does not start within six months"
+    vars:
+      question: "What happens if an authorised provider does not start business within six months?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "The Bank may suspend or revoke the authorisation (REGS reg 10(1)(a)); the provider must re-apply if it still intends to operate (ACT s.14(1) proviso). Either counts as correct."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "The Bank may suspend or revoke the authorisation (REGS reg 10(1)(a)); the provider must re-apply if it still intends to operate (ACT s.14(1) proviso). Either counts as correct."
+
+  - description: "MP-027 Verify the bot states the notice required before revoking an authorisation"
+    vars:
+      question: "How much notice must the Bank give before revoking or suspending an authorisation?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Not less than fourteen days' written notice, and it must consider written representations made in that period."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Not less than fourteen days' written notice, and it must consider written representations made in that period."
+
+  - description: "MP-028 Verify the bot states how long records must be kept"
+    vars:
+      question: "How long must records be kept?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Seven years from the date of each record."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Seven years from the date of each record."
+
+  - description: "MP-029 Verify the bot states the time limit to resolve a complaint"
+    vars:
+      question: "How long does a provider have to resolve a complaint?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Thirty days of it being filed."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Thirty days of it being filed."
+
+  - description: "MP-030 Verify the bot states the time limit to file a complaint"
+    vars:
+      question: "How long does a customer have to file a complaint with the provider?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Fifteen days from the date of occurrence."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Fifteen days from the date of occurrence."
+
+  - description: "MP-031 Verify the bot says complaint handling must be free"
+    vars:
+      question: "Can a provider charge for handling complaints?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "No; it must provide complaint handling processes for free."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "No; it must provide complaint handling processes for free."
+
+  - description: "MP-032 Verify the bot states the trust fund balance rule"
+    vars:
+      question: "What must the trust fund balance be compared with what is owed to customers?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "It must never be less than what is owed to customers."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "It must never be less than what is owed to customers."
+
+  - description: "MP-033 Verify the bot says trust funds cannot be moved to the provider's operating account"
+    vars:
+      question: "May a provider move trust funds into its own operating account?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "No."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "No."
+
+  - description: "MP-034 Verify the bot says where trust funds may be placed"
+    vars:
+      question: "Where may trust funds be placed?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "In commercial banks licensed under the Banking Act or in Government of Kenya securities."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "In commercial banks licensed under the Banking Act or in Government of Kenya securities."
+
+  - description: "MP-035 Verify the bot says how customer identity is verified"
+    vars:
+      question: "How must a provider verify a customer's identity card or passport?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Through the Integrated Population Registration System database, or other means the Bank approves."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Through the Integrated Population Registration System database, or other means the Bank approves."
+
+  - description: "MP-036 Verify the bot states the notice required before a substantial change"
+    vars:
+      question: "How much notice must a provider give the Bank before a substantial change to its service?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Thirty days before the change starts."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Thirty days before the change starts."
+
+  - description: "MP-037 Verify the bot resolves \"that authorisation\" in a follow-up about validity"
+    vars:
+      question: "And how long is that authorisation valid for?"
+      history:
+        - role: user
+          content: "What is the penalty for operating without authorisation?"
+        - role: assistant
+          content: "A fine not exceeding KSh 500,000, or imprisonment not exceeding three years, or both."
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Second answer: twelve months (it must resolve \"that authorisation\")."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Second answer: twelve months (it must resolve \"that authorisation\")."
+
+  - description: "MP-038 Verify the bot keeps the subject in a follow-up about where M-PESA launched"
+    vars:
+      question: "Which country did it first launch in?"
+      history:
+        - role: user
+          content: "Who launched M-PESA?"
+        - role: assistant
+          content: "Vodafone and Safaricom (launched 2007)."
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Second answer: Kenya (Safaricom launched it); must not drift to another country."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Second answer: Kenya (Safaricom launched it); must not drift to another country."
+
+  - description: "MP-039 Verify the bot combines the complaint time limit and the appeal to the Bank"
+    vars:
+      question: "If I complain to my provider and I am not satisfied, what can I do?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Provider must resolve within thirty days (reg 40(1)); if not satisfied, customer may appeal to the Bank (reg 40(5))."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Provider must resolve within thirty days (reg 40(1)); if not satisfied, customer may appeal to the Bank (reg 40(5))."
+
+  - description: "MP-040 Verify the bot combines the licence rule and the trust fund rule"
+    vars:
+      question: "What licence does a provider need, and what does the law say it must do with customer money?"
+    assert:
+      - type: context-faithfulness
+        metric: faithfulness
+        threshold: 0
+        transform: output.content
+        contextTransform: output.contexts
+      - type: context-recall
+        metric: context_recall
+        threshold: 0
+        contextTransform: output.contexts
+        value: "Needs authorisation (ACT s.12-13); holds customer money in a trust fund (REGS reg 25(3)). Both documents should be reflected."
+      - type: factuality
+        metric: factuality
+        transform: output.content
+        value: "Needs authorisation (ACT s.12-13); holds customer money in a trust fund (REGS reg 25(3)). Both documents should be reflected."
