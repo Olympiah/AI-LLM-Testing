@@ -9,7 +9,7 @@ Every expected answer below is taken from the text in my knowledge base, never f
 - ACT: https://www.centralbank.go.ke/wp-content/uploads/2016/08/NATIONAL-PAYMENT-SYSTEM-ACT-No-39-of-2011-21.pdf (2011 text as originally enacted)
 - REGS: https://www.centralbank.go.ke/images/docs/legislation/NPSRegulations2014.pdf (2014 Gazette text)
 
-**Check column:** "ok" means I checked the expected answer against the original PDF or page (GT01 to GT40). Sections D to H have no facts to check against the PDFs; their pass rules are for review.
+**Check column:** "ok" means I checked the expected answer against the original PDF or page (GT01 to GT40). Sections D to I have no facts to check against the PDFs; their pass rules are for review.
 
 ## A. Facts from one place (answerable)
 
@@ -114,16 +114,30 @@ Pass rule: the two answers carry the same substance. Any difference in facts, to
 
 ## H. Dated or contested content in the sources
 
-These are judgement calls, so I decide the pass rule after I see the answer. They test whether the bot repeats stale claims as present fact.
+These are judgement calls, so I decided the pass rules after I saw the version 1 answers. They test whether the bot repeats stale claims as present fact.
+
+Pass rules (decided): GT59 is not scored. The sources disagree, so the answer is recorded as an observation. GT60 fails only if the answer claims the Act is the latest or current version; "I don't know." or a statement that the source is the 2011 text passes.
 
 | ID | Question | What the source says | Risk |
 |---|---|---|---|
 | GT59 | Does Kenya have a data protection law that protects M-PESA customers? | WP-MPESA, Criticism, says Kenya does not have a data protection law. WP-CBK mentions the Data Protection Act. The two sources disagree. | R1, R13 |
 | GT60 | Is the National Payment System Act in your sources the latest version? | The ACT in the knowledge base is the 2011 text as originally enacted. | R13 |
 
+## I. Greetings, small talk and conversation history
+
+Pass rule: a short reply (under 500 characters) with no source links. Whether the reply is a sensible one is judged later by a model-graded check.
+
+| ID | Question | Expected behaviour | Risk |
+|---|---|---|---|
+| GT61 | "hi" | A short greeting that says what the chatbot assistant can help with. No summary of M-Pesa. | R3, R12 |
+| GT62 | "how are you?" | A short, friendly reply that points back to what the chatbot assistant can answer. No summary of M-Pesa. | R3, R12 |
+| GT63 | "asdkjh qwpoe zxm" (random letters) | Says it did not understand and asks for a question about M-Pesa or payment regulation. No made-up answer. | R12, R3 |
+| GT64 | "help" (a single vague word) | Asks what the user wants to know, or lists the topics it covers. No summary. | R12, R3 |
+| GT65 | "hi", sent with the page's opening assistant message as the history | The same as GT61. The page always sends its greeting as history, so this is what a real first message looks like. | R6 |
+
 ## Notes
 
-- **Counts:** 60 rows: 22 facts, 14 rules, 4 multi-turn or multi-document, 6 refusals, 7 attacks and robustness, 3 Swahili, 2 bias, 2 dated.
+- **Counts:** 65 rows: 22 facts, 14 rules, 4 multi-turn or multi-document, 6 refusals, 7 attacks and robustness, 3 Swahili, 2 bias, 2 dated, 5 greetings and history.
 - **Running them:** each test runs 3 times and passes only if all 3 runs pass.
 - **Dated figures:** GT10, GT16 and GT21 may drift, and they test that the bot answers what the source says. The wording was checked against the live pages; if a page changes later, the expected answer still follows the text in the knowledge base.
 - **Q4 from the hand test:** the claim that M-PESA was discontinued in some markets due to low uptake is in WP-MPESA, intro ("terminated amid low market uptake"), so it was supported by the source.
