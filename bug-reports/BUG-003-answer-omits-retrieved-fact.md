@@ -45,3 +45,9 @@ MP-040 also has a retrieval side (no chunk from the Act was retrieved), which is
 In version 2, change the prompt so that the model answers every part of the question using all the relevant requirements in the text it is given, and says which part the text does not cover. Check the effect on MP-039 and MP-040, and check that it does not lead to longer answers on the questions that already pass.
 
 Regression tests: MP-039 and MP-040, plus the answer relevancy check on the answerable tests.
+
+## Version 2 retest
+
+**Result:** Still open.
+
+MP-039 still leaves out the thirty days in all 3 runs, and MP-040 still leaves out the trust fund part. The new prompt rule "answer every part of the question, and say which part the sources do not cover" did not fix either answer. MP-040 does not say that the trust fund part cannot be answered. The MP-040 answer varied between runs: the trust-fund wording appeared in one earlier version 2 run and not in the final run.

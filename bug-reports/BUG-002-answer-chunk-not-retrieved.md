@@ -53,3 +53,11 @@ Not decided. Version 2 is planned to filter retrieved chunks by a relevance scor
 - ask the model to treat a multi-part question as separate searches.
 
 Regression tests: MP-003, MP-008, MP-035 and MP-040, plus the context recall check on the answerable tests.
+
+## Version 2 retest
+
+**Result:** Still open. Retrieval was not changed in version 2.
+
+MP-008 and MP-035 answer "I don't know based on my sources." in all 3 runs. MP-055 (the Swahili complaint question) does the same, and it is also recorded as a Swahili limitation. MP-003 still leaves out India. MP-040 still has no link to the Act. These are the same retrieval misses as in version 1, because the search still returns the 4 closest chunks, with no change to the chunks, their size or the number retrieved.
+
+What changed is only the surface: the refusal wording, and the fact that a refusal now shows no source links.

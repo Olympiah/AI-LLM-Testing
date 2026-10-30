@@ -5,3 +5,4 @@ evals/results*.json
 evals/*.log
 evals/failures*.txt
 evals/contexts*.txt
+docs/05-decision-log.md

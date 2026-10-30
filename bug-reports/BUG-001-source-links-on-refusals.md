@@ -1,7 +1,7 @@
 # [SOURCE CITATION] Source links are shown under answers that do not use the knowledge base
 
 **ID:** BUG-001
-**Status:** Open
+**Status:** Fixed in version 2
 **Frequency:** Always (3 of 3 runs on each of 10 questions)
 
 ## Severity / Priority
@@ -45,3 +45,13 @@ The `links` field returned by `chatbot/app/api/chat/route.ts` is built from the 
 In version 2, filter the retrieved chunks by a relevance score (`similaritySearchWithScore` with a `MIN_SCORE`, tuned on a set of in-scope and off-topic questions so good chunks are not dropped). Show only the sources of chunks that pass the filter, and show none when nothing passes or the answer is "I don't know."
 
 Regression tests: MP-041 to MP-046 and MP-061 to MP-064 (links must be empty on refusals and on replies that do not use the knowledge base), plus a check on the answerable tests that the links contain no unrelated source.
+
+## Version 2 retest
+
+**Result:** Fixed in version 2.
+
+Tests MP-041 to MP-046 (refusals) and MP-061 to MP-065 (greeting, small talk, random letters, a vague word, and a greeting with the page's opening message in the history) all passed 3 of 3 runs. None of the 33 runs returned a source link. In version 1 every one of those runs returned 1 to 3 links.
+
+How it was fixed: the chatbot assistant now returns a structured reply with a field that says whether the reply used the knowledge base. The links are shown only when that field is true, so a greeting, a refusal or "I don't know based on my sources." shows no links. The relevance score filter recommended above was not used.
+
+Remaining limits: the search still returns four chunks for every message, including unrelated ones (they are still returned to the test tool as `contexts`), and the decision now depends on the model's judgement of its own reply. As a side effect, an "I don't know" on an answerable question (BUG-002) now has no link either.

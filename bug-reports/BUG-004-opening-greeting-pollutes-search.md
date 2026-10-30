@@ -1,7 +1,7 @@
 # [MULTI-TURN] The page's opening greeting is mixed into the search, so a first message like "hi" gets an unrelated M-Pesa summary
 
 **ID:** BUG-004
-**Status:** Open
+**Status:** Fixed in version 2
 **Frequency:** Always (3 of 3 runs)
 
 ## Severity / Priority
@@ -61,3 +61,11 @@ The rewritten question is also what the answer step receives. With an empty hist
 In version 2 before the history is turned into text, drop any assistant message that comes before the first user message, and keep the rest of the history. If nothing is left, pass an empty history so the rewrite is skipped and "hi" goes to the search as it is. Dropping all assistant messages is not recommended, because a follow-up such as "and what's the penalty for that?" needs the previous answer to know what "that" is. Stopping the page from sending the greeting is harmless as an extra, but it would not fix the API for other callers.
 
 Regression tests: MP-065, MP-061 to MP-064, and a follow-up test (a question followed by "and for how long?") to show that real conversations still work.
+
+## Version 2 retest
+
+**Result:** Fixed in version 2.
+
+MP-065 (`hi` with the page's opening greeting in the history) passed 3 of 3 runs in the full run and 5 of 5 in a separate 5-run check. The reply is a short greeting that says the chatbot assistant can answer questions about M-Pesa and Kenya's payment regulation, with no source links and no summary. In version 1 it was an overview of about 1,500 characters. The follow-up tests MP-037 and MP-038 (a question followed by a short follow-up) also passed 3 of 3 runs, so real conversations still work.
+
+How it was fixed: before the history is turned into text, assistant messages that come before the first user message are dropped, and the rest of the history is kept with its roles ("Human: ..." and "Assistant: ..."). When nothing is left, the rewrite step is skipped and "hi" is searched as it is. The rewrite prompt also tells the chatbot assistant to leave a greeting or thanks unchanged.
