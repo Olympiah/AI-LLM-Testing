@@ -1,0 +1,153 @@
+# Full suite: the complete evaluation, run by hand (never automatically).
+#
+# Unlike the smoke gate (13 cheap tests on every PR), this runs every test
+# several times against the real model, so it costs more and takes longer. It
+# is manual-only for that reason. The suite has known failures (open bugs), so
+# the job does not go red on those; it goes red only on a NEW failure, which
+# is what the "Check for new failures" step decides.
+name: Full suite
+
+# WHEN the workflow runs: only when started by hand from the Actions tab.
+on:
+  workflow_dispatch:
+    inputs:
+      repeat:
+        description: "Runs per test (the evaluation used 3)"
+        required: false
+        default: "3"
+      run_metrics:
+        description: "Also run the score-based metrics (faithfulness, context recall, factuality)"
+        type: boolean
+        required: false
+        default: false
+
+# Least privilege: the job only needs to read the repository contents.
+permissions:
+  contents: read
+
+jobs:
+  full:
+    runs-on: ubuntu-latest
+    # Hard stop so a hung server or stuck API call cannot burn runner minutes.
+    # Longer than the smoke gate because every test runs several times.
+    timeout-minutes: 45
+    steps:
+      # Download the repository code onto the runner.
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      # Install Node and cache npm downloads (two projects, two lockfiles).
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            chatbot/package-lock.json
+            evals/package-lock.json
+
+      # "npm ci" installs exactly what the lockfile says (repeatable builds).
+      - name: Install chatbot dependencies
+        working-directory: chatbot
+        run: npm ci
+
+      - name: Install evals dependencies
+        working-directory: evals
+        run: npm ci
+
+      # Production-style build. Secrets are set only on the steps that need
+      # them, and GitHub masks their values in the logs.
+      - name: Build the chatbot assistant
+        working-directory: chatbot
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+          PINECONE_INDEX: ${{ secrets.PINECONE_INDEX }}
+        run: npm run build
+
+      # Start the app in the background and poll port 3000 every 2 seconds, up
+      # to 60 times (about 2 minutes). If it never answers, print the log and
+      # fail, so a broken start is one clear error and not 65 test failures.
+      - name: Start the chatbot assistant
+        working-directory: chatbot
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+          PINECONE_INDEX: ${{ secrets.PINECONE_INDEX }}
+        run: |
+          nohup npm run start > ../chatbot.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -s -o /dev/null http://localhost:3000/; then
+              echo "Chatbot assistant is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Chatbot assistant did not start"
+          tail -n 50 ../chatbot.log
+          exit 1
+
+      # Run every test. "set +e" stops the shell from quitting on the first
+      # non-zero exit code, so we can look at the code ourselves.
+      # promptfoo exit code 100 means "some tests failed". The suite has known
+      # failures, so 100 is expected and not an error here. Any other non-zero
+      # code (a crash, a bad config) is a real problem and fails the step.
+      # The real pass/fail decision is made later by the regression check.
+      - name: Run the full main suite
+        working-directory: evals
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          RUNS: ${{ inputs.repeat || '3' }}
+        run: |
+          set +e
+          npx promptfoo eval -c promptfooconfig.yaml --repeat "$RUNS" --no-cache -o results-full.json
+          code=$?
+          echo "promptfoo exit code: $code"
+          # 100 means some tests failed. The suite has known failures, so that is expected here.
+          if [ "$code" -ne 0 ] && [ "$code" -ne 100 ]; then
+            exit "$code"
+          fi
+          echo "::notice::Full suite finished. Read the results file for the pass and fail counts."
+
+      # Optional second run with the score-based metrics (gpt-4o judged), only
+      # when the "run_metrics" box was ticked. Same exit-code handling as above.
+      - name: Run the score-based metrics
+        if: ${{ inputs.run_metrics }}
+        working-directory: evals
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set +e
+          npx promptfoo eval -c promptfooconfig.metrics.yaml --repeat 1 --no-cache -o results-full-metrics.json
+          code=$?
+          echo "promptfoo exit code: $code"
+          if [ "$code" -ne 0 ] && [ "$code" -ne 100 ]; then
+            exit "$code"
+          fi
+
+      # The regression gate. Compares the failures in results-full.json with
+      # the list of known failures (open bugs) below. The job goes red only if
+      # a test OUTSIDE that list fails. When a known bug is fixed, the summary
+      # lists its tests under "now pass"; remove them from this list so they
+      # are guarded again. No API key needed: it only reads the results file.
+      # It runs after the metrics step so a red result does not skip metrics,
+      # and the upload step below has "if: always()", so the results file is
+      # saved even when this step goes red.
+      - name: Check for new failures
+        working-directory: evals
+        env:
+          KNOWN_FAILURES: "MP-003,MP-008,MP-035,MP-039,MP-040,MP-055"
+        run: node scripts/check-regressions.js results-full.json
+
+      # Keep the results for 30 days. "if: always()" uploads them even when an
+      # earlier step failed, which is when they are needed most.
+      - name: Upload the results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-suite-results
+          path: |
+            evals/results-full.json
+            evals/results-full-metrics.json
+          retention-days: 30
+          if-no-files-found: ignore
