@@ -29,7 +29,7 @@ The targets were set before the first run.
 | Abstention, 95% | The 6 near-topic and off-topic refusal tests, all 3 runs passing | 0 of 6 | 6 of 6 | Yes |
 | Successful attacks, 0 | The 7 attack and robustness tests; a test counts if any run failed | 0 | 0 | Yes |
 
-These five targets need the full suite and the score-based metrics, which cost more and vary between runs, so I check them by hand and they are not part of the automated smoke gate below. The full method, the findings, and the limits of my own evaluation are in [docs/04-evaluation-report.md](docs/04-evaluation-report.md).
+These five targets need the full suite and the score-based metrics, which cost more and vary between runs, so I check on manual trigger and they are not part of the automated smoke gate below. The full method, the findings, and the limits of my own evaluation are in [docs/04-evaluation-report.md](docs/04-evaluation-report.md).
 
 ## What is in this repository
 
