@@ -1,0 +1,153 @@
+# Smoke gate: a small, cheap check that the chatbot assistant still behaves.
+#
+# It builds and starts the chatbot inside the CI runner, runs 13 plain-check
+# tests against it, and goes red if any test still fails after one re-run.
+# The full quality targets (correctness, attribution, faithfulness, abstention,
+# attacks) are NOT checked here: they need the full suite and gpt-4o metrics,
+# which cost more and vary, so they stay a manual run documented in the report.
+name: Smoke gate
+
+# WHEN the workflow runs.
+on:
+  # Manual runs from the Actions tab. The optional "pattern" input lets me run a
+  # different set of tests by hand without editing this file.
+  workflow_dispatch:
+    inputs:
+      pattern:
+        description: "Regex on test descriptions (default is the 13 smoke tests)"
+        required: false
+        default: ""
+  # Pull requests into main, but only when chatbot code, the evals, or this
+  # workflow itself changed. Doc, workbook and README changes do not start a
+  # run, so they cost nothing. There is no push trigger: every test calls the
+  # real model and costs money.
+  pull_request:
+    branches: [main]
+    paths:
+      - "chatbot/**"
+      - "evals/**"
+      - ".github/workflows/**"
+
+# Least privilege: the job only needs to read the repository contents.
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    # Safety net: secrets are not passed to pull requests from forks, so skip
+    # those instead of failing. Manual runs and PRs from this repo always run.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    # Hard stop so a hung server or stuck API call cannot burn runner minutes.
+    timeout-minutes: 20
+    env:
+      # The tests to run, as a regex on the test description. Every description
+      # starts with its ID (for example "MP-001 Verify ..."), so ^(MP-001|...)
+      # picks tests by ID, and \b stops MP-004 from also matching MP-040.
+      # A value typed into the manual "pattern" box wins; otherwise the 13
+      # smoke tests are used.
+      SMOKE_PATTERN: ${{ inputs.pattern || '^(MP-001|MP-014|MP-020|MP-024|MP-029|MP-037|MP-041|MP-042|MP-045|MP-047|MP-051|MP-053|MP-065)\b' }}
+    steps:
+      # Download the repository code onto the runner.
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      # Install Node (same major version I use locally) and cache npm downloads.
+      # chatbot/ and evals/ each have their own lockfile, so both are listed.
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            chatbot/package-lock.json
+            evals/package-lock.json
+
+      # "npm ci" installs exactly what the lockfile says (repeatable builds),
+      # unlike "npm install", which may update versions. Two separate projects,
+      # so two installs.
+      - name: Install chatbot dependencies
+        working-directory: chatbot
+        run: npm ci
+
+      - name: Install evals dependencies
+        working-directory: evals
+        run: npm ci
+
+      # Production-style build of the Next.js app. The keys come from GitHub
+      # repository secrets and are set only on the steps that need them, so the
+      # other steps never see them. GitHub masks secret values in the logs.
+      - name: Build the chatbot assistant
+        working-directory: chatbot
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+          PINECONE_INDEX: ${{ secrets.PINECONE_INDEX }}
+        run: npm run build
+
+      # Start the built app in the background (nohup and &), logging to a file
+      # outside the app folder. Then poll port 3000 every 2 seconds, up to 60
+      # times (about 2 minutes), until the app answers. If it never does, print
+      # the end of the log and fail, so a broken start shows up as a clear error
+      # and not as 13 confusing test failures. The ingestion step is not run in
+      # CI: the Pinecone index already exists.
+      - name: Start the chatbot assistant
+        working-directory: chatbot
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+          PINECONE_INDEX: ${{ secrets.PINECONE_INDEX }}
+        run: |
+          nohup npm run start > ../chatbot.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -s -o /dev/null http://localhost:3000/; then
+              echo "Chatbot assistant is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Chatbot assistant did not start"
+          tail -n 50 ../chatbot.log
+          exit 1
+
+      # Run the smoke tests with promptfoo against http://localhost:3000.
+      #   --filter-pattern  only the tests matching the regex above
+      #   --repeat 1        one run each (the config default is 3, for the full suite)
+      #   --no-cache        always call the real model, never reuse old answers
+      #   -o                save the results as JSON so they can be uploaded
+      # This step only gets the OpenAI key, which the model-graded (rubric)
+      # checks need. It does not get the Pinecone keys.
+      #
+      # Retry rule: promptfoo exits non-zero when a test fails. If that happens,
+      # re-run only the failed tests once (--filter-failing reads the first
+      # results file). Model answers can vary, so one re-run separates a flaky
+      # test from a real break. If a test fails again, the second command exits
+      # non-zero, this step fails, and the gate goes red. If it passes on the
+      # re-run, the gate stays green and a warning records the flaky test.
+      - name: Run the smoke tests
+        working-directory: evals
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if npx promptfoo eval -c promptfooconfig.yaml --filter-pattern "$SMOKE_PATTERN" --repeat 1 --no-cache -o results-ci.json; then
+            echo "All smoke tests passed on the first run"
+          else
+            echo "::warning::At least one test failed; re-running only the failed tests once"
+            npx promptfoo eval -c promptfooconfig.yaml --filter-failing results-ci.json --repeat 1 --no-cache -o results-ci-retry.json
+            echo "::warning::Tests that failed once and passed on the re-run are counted as passes"
+          fi
+
+      # Keep the results files for 7 days so a failure can be inspected from
+      # the run page. "if: always()" uploads them even when the tests failed,
+      # which is exactly when they are needed. If a file was never produced
+      # (for example the build failed), do not raise a second error.
+      - name: Upload the results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-results
+          path: |
+            evals/results-ci.json
+            evals/results-ci-retry.json
+          retention-days: 7
+          if-no-files-found: ignore
